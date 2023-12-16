@@ -2,7 +2,7 @@ import {parse} from 'papaparse'
 import {useEffect, useState} from 'react'
 import {LatLng} from "leaflet"
 import circle from "@turf/circle"
-import {Feature, Polygon} from 'geojson'
+import {Feature, Polygon, FeatureCollection} from 'geojson'
 
 type RamenData = {
   latLng: LatLng,
@@ -22,7 +22,7 @@ type CultualData = {
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()
     const [cultuals, setCultuals] = useState<CultualData[]>()
-    const [safeCircle, setSafeCircle] = useState<Feature<Polygon>>()
+    const [safeCircle, setSafeCircle] = useState<FeatureCollection>()
 
     useEffect(() => {
       fetch(`/data/ramen.csv`)
@@ -73,8 +73,23 @@ const useRamenData = () => {
     }, [])
 
     const showCircle = (latLng: LatLng) => {
-      const circleFeature = circle([latLng.lat, latLng.lng], 4.5)
-      setSafeCircle(circleFeature)
+      const circle1Feature = circle([latLng.lng, latLng.lat], 1.0, {properties: {level: 1}})
+      const circle2Feature = circle([latLng.lng, latLng.lat], 2.5, {properties: {level: 2}})
+      const circle3Feature = circle([latLng.lng, latLng.lat], 4.5, {properties: {level: 3}})
+      const circle4Feature = circle([latLng.lng, latLng.lat], 9.0, {properties: {level: 4}})
+      const id =  `${latLng.lat}_${latLng.lng}`
+      circle1Feature.id = id
+
+      const featureCollection: FeatureCollection = {
+        features: [
+          circle1Feature,
+          circle2Feature,
+          circle3Feature,
+          circle4Feature,
+        ],
+        type: 'FeatureCollection',
+      }
+      setSafeCircle(featureCollection)
     }
 
   return { ramenData: ramens, cultualData: cultuals, showCircle, safeCircle }
