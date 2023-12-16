@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@turf/circle": "^6.5.0",
     "deck.gl": "^8.9.33",
     "leaflet": "^1.9.4",
     "next": "14.0.4",
