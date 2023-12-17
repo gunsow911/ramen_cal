@@ -2,7 +2,8 @@ import {parse} from 'papaparse'
 import {useEffect, useState} from 'react'
 import {LatLng} from "leaflet"
 import circle from "@turf/circle"
-import {Feature, Polygon, FeatureCollection} from 'geojson'
+import {FeatureCollection} from 'geojson'
+import rhumbDistance from '@turf/rhumb-distance'
 
 type RamenData = {
   latLng: LatLng,
@@ -20,36 +21,40 @@ type CultualData = {
 }
 
 export type ExerciseInput = {
-  power: "high" | "low",
-  method: "walking" | "jogging" | "cycling"
+  minutes: number,
+  method: "walking"| "jogging" | "running" | "cycling"
+  isHalf: boolean
 }
 
 
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()
+    const [filteredCultuals, setFilteredCultuals] = useState<CultualData[]>()
     const [cultuals, setCultuals] = useState<CultualData[]>()
     const [safeCircle, setSafeCircle] = useState<FeatureCollection>()
-    const [radius, setRadius] = useState<number>(3.0)
+    const [radius, setRadius] = useState<{minutes: number, zero: number}>({minutes: 3.0, zero: 3.0})
     const [latLng, setLatLng] = useState<LatLng>()
 
     useEffect(() => {
       if (latLng === undefined) return
-      const circle1Feature = circle([latLng.lng, latLng.lat], radius / 4.0, {properties: {level: 1}})
-      const circle2Feature = circle([latLng.lng, latLng.lat], radius / 2.0, {properties: {level: 2}})
-      const circle3Feature = circle([latLng.lng, latLng.lat], radius, {properties: {level: 3}})
-      const id =  `${latLng.lat}_${latLng.lng}_${radius}`
-      circle1Feature.id = id
+      const circleFeature = circle([latLng.lng, latLng.lat], radius.minutes, {properties: {level: 1}})
+      const circleZeroFeature = circle([latLng.lng, latLng.lat], radius.zero, {properties: {level: 2}, steps: 120})
+      const id = `${latLng.lat}_${latLng.lng}_${radius.minutes}`
+      circleFeature.id = id
 
       const featureCollection: FeatureCollection = {
         features: [
-          circle1Feature,
-          circle2Feature,
-          circle3Feature,
+          circleFeature,
+          circleZeroFeature
         ],
         type: 'FeatureCollection',
       }
       setSafeCircle(featureCollection)
-    }, [radius, latLng])
+
+      if (cultuals === undefined) return
+      const filtered = cultuals.filter(c => isWithinRange(latLng, c.latLng, radius.minutes))
+      setFilteredCultuals(filtered)
+    }, [radius, latLng, cultuals])
 
     useEffect(() => {
       fetch(`/data/ramen.csv`)
@@ -100,20 +105,47 @@ const useRamenData = () => {
     }, [])
 
     const setExerciseInput = (input: ExerciseInput) => {
-      setRadius(getRadius(input))
+      setRadius({minutes: getRadius(input), zero: getZeroCalRadius(input)} )
     }
 
     const showCircle = (point: LatLng) => {
       setLatLng(point)
     }
 
-    const getRadius = (exercise: ExerciseInput) => {
-      if (exercise.power === "high") return 4.5
-      if (exercise.power === "low") return 3.0
-      return 3.0
+    const getZeroCalRadius = (exercise: ExerciseInput) => {
+      let mets = 1.0
+      if (exercise.method == 'walking') mets = 3.0
+      if (exercise.method == 'jogging') mets = 7.0
+      if (exercise.method == 'running') mets = 8.3 
+      if (exercise.method == 'cycling') mets = 8.0
+      const cal = 500
+      const minutes = (cal / (60 * mets * 1.05)) * 60
+      const r = minutes * getSpeed(exercise) / 1000
+      if (exercise.isHalf) return r
+      return r / 2
     }
 
-  return { ramenData: ramens, cultualData: cultuals, showCircle, safeCircle, setExerciseInput }
+    const getRadius = (exercise: ExerciseInput) => {
+      const r = exercise.minutes * getSpeed(exercise) / 1000
+      if (exercise.isHalf) return r
+      return r / 2
+    }
+
+    const getSpeed = (exercise: ExerciseInput) => {
+      let speed = 0
+      if (exercise.method == 'walking') speed = 67
+      if (exercise.method == 'jogging') speed = 106
+      if (exercise.method == 'running') speed = 134
+      if (exercise.method == 'cycling') speed = 333
+      return speed
+    }
+
+    const isWithinRange = (from: LatLng, to: LatLng, range: number) => {
+      const dist = rhumbDistance([from.lng, from.lat], [to.lng, to.lat]) 
+      return dist <= range
+    }
+
+  return { ramenData: ramens, cultualData: filteredCultuals, showCircle, safeCircle, setExerciseInput }
 }
 
 export default useRamenData

@@ -21,8 +21,9 @@ const Map = () => {
   const form = useForm<ExerciseInput>({
     reValidateMode: "onChange",
     defaultValues: {
-      power: "high",
+      minutes: 30,
       method: "walking",
+      isHalf: false,
     }
   })
 
@@ -48,15 +49,27 @@ const Map = () => {
             key={safeCircle.features[0].id}
             data={safeCircle} 
             style={(feature) => {
-              let color = "#ffffff"
-              if (feature?.properties.level === 1) color = "#ff0000"
-              if (feature?.properties.level === 2) color = "#0000ff"
-              if (feature?.properties.level === 3) color = "#00ff00"
+              let color = "#0000ff"
+              if (feature?.properties.level === 1) {
+                return {
+                  weight: 0.0,
+                  fillColor: "#0000ff",
+                  fillOpacity: 0.3,
+                }
+              }
+              if (feature?.properties.level === 2){
+                return {
+                  weight: 2.0,
+                  fillColor: "#ffffff",
+                  fillOpacity: 0.0,
+                  color: "#ff0000",
+                }
+              }
               return {
                 weight: 0.0,
-                fillColor: color,
+                fillColor: "#ffffff",
                 fillOpacity: 0.3,
-                color: color,
+                color: "#ffffff",
               }
             }}
           />
