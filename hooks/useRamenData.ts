@@ -19,10 +19,37 @@ type CultualData = {
   kind: string,
 }
 
+export type ExerciseInput = {
+  power: "high" | "low",
+  method: "walking" | "jogging" | "cycling"
+}
+
+
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()
     const [cultuals, setCultuals] = useState<CultualData[]>()
     const [safeCircle, setSafeCircle] = useState<FeatureCollection>()
+    const [radius, setRadius] = useState<number>(3.0)
+    const [latLng, setLatLng] = useState<LatLng>()
+
+    useEffect(() => {
+      if (latLng === undefined) return
+      const circle1Feature = circle([latLng.lng, latLng.lat], radius / 4.0, {properties: {level: 1}})
+      const circle2Feature = circle([latLng.lng, latLng.lat], radius / 2.0, {properties: {level: 2}})
+      const circle3Feature = circle([latLng.lng, latLng.lat], radius, {properties: {level: 3}})
+      const id =  `${latLng.lat}_${latLng.lng}_${radius}`
+      circle1Feature.id = id
+
+      const featureCollection: FeatureCollection = {
+        features: [
+          circle1Feature,
+          circle2Feature,
+          circle3Feature,
+        ],
+        type: 'FeatureCollection',
+      }
+      setSafeCircle(featureCollection)
+    }, [radius, latLng])
 
     useEffect(() => {
       fetch(`/data/ramen.csv`)
@@ -72,27 +99,21 @@ const useRamenData = () => {
         })
     }, [])
 
-    const showCircle = (latLng: LatLng) => {
-      const circle1Feature = circle([latLng.lng, latLng.lat], 1.0, {properties: {level: 1}})
-      const circle2Feature = circle([latLng.lng, latLng.lat], 2.5, {properties: {level: 2}})
-      const circle3Feature = circle([latLng.lng, latLng.lat], 4.5, {properties: {level: 3}})
-      const circle4Feature = circle([latLng.lng, latLng.lat], 9.0, {properties: {level: 4}})
-      const id =  `${latLng.lat}_${latLng.lng}`
-      circle1Feature.id = id
-
-      const featureCollection: FeatureCollection = {
-        features: [
-          circle1Feature,
-          circle2Feature,
-          circle3Feature,
-          circle4Feature,
-        ],
-        type: 'FeatureCollection',
-      }
-      setSafeCircle(featureCollection)
+    const setExerciseInput = (input: ExerciseInput) => {
+      setRadius(getRadius(input))
     }
 
-  return { ramenData: ramens, cultualData: cultuals, showCircle, safeCircle }
+    const showCircle = (point: LatLng) => {
+      setLatLng(point)
+    }
+
+    const getRadius = (exercise: ExerciseInput) => {
+      if (exercise.power === "high") return 4.5
+      if (exercise.power === "low") return 3.0
+      return 3.0
+    }
+
+  return { ramenData: ramens, cultualData: cultuals, showCircle, safeCircle, setExerciseInput }
 }
 
 export default useRamenData
