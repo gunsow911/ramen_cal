@@ -1,14 +1,15 @@
 import useRamenData, {ExerciseInput} from '@/hooks/useRamenData'
 import { Marker, Popup, GeoJSON } from 'react-leaflet'
-import { Icon, LeafletMouseEvent } from 'leaflet'
-import React, {useEffect, useMemo} from 'react'
+import { Icon, LatLng, LeafletMouseEvent } from 'leaflet'
+import React, {useMemo, useState} from 'react'
 import { MapContainer, TileLayer} from 'react-leaflet'
 import {iconRamen, iconCultual} from './Icons'
 import ExerciseControl from './ExerciseControl'
-import {FormProvider, useForm} from 'react-hook-form'
+import {FormProvider, useForm, useWatch} from 'react-hook-form'
 
 const Map = () => {
-  const {ramenData, cultualData, showCircle, safeCircle, setExerciseInput} = useRamenData()
+  const {ramenData, getCultures, getSafeCircle} = useRamenData()
+  const [latLng, setLatLng] = useState<LatLng>()
   const ramenIcon = useMemo(() => {
     const icon: Icon = iconRamen
     return icon
@@ -19,7 +20,7 @@ const Map = () => {
   }, [])
 
   const form = useForm<ExerciseInput>({
-    reValidateMode: "onChange",
+    reValidateMode: "onSubmit",
     defaultValues: {
       minutes: 30,
       method: "walking",
@@ -27,14 +28,16 @@ const Map = () => {
     }
   })
 
-  const exerciseInput = form.watch()
+  form.watch()
 
-  useEffect(() => {
-    setExerciseInput(exerciseInput)
-  }, [exerciseInput, setExerciseInput])
+
+
+  const safeCircle = useMemo(() => {
+    return getSafeCircle(latLng, form.getValues())
+  }, [getSafeCircle, latLng, form])
 
   const onClick = (e: LeafletMouseEvent) => {
-    showCircle(e.latlng)
+    setLatLng(e.latlng)
   }
 
   return (
@@ -46,10 +49,9 @@ const Map = () => {
         />
         {safeCircle && 
           <GeoJSON 
-            key={safeCircle.features[0].id}
+            key={safeCircle.features[0]?.id ?? ""}
             data={safeCircle} 
             style={(feature) => {
-              let color = "#0000ff"
               if (feature?.properties.level === 1) {
                 return {
                   weight: 0.0,
@@ -92,7 +94,7 @@ const Map = () => {
             )
           }
         )}
-        {cultualData && cultualData.map((cultual, index) => {
+        {getCultures(latLng, form.getValues()).map((cultual, index) => {
           return(
             <React.Fragment key={index}>
               <Marker position={cultual.latLng} icon={cultualIcon}>

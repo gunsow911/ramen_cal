@@ -4,7 +4,7 @@ import React from 'react';
 import 'leaflet/dist/leaflet.css'
 
 export default function MapPage() {
-  const MapComponent = React.useMemo(
+  const Map = React.useMemo(
     () =>
       dynamic(() => import("../../components/Map"), {
         loading: () => <p>ラーメンマップ準備中…</p>,
@@ -15,7 +15,7 @@ export default function MapPage() {
   );
   return (
     <main>
-      <MapComponent />
+      <Map />
     </main>
   )
 }

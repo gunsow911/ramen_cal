@@ -1,12 +1,11 @@
 import {ExerciseInput} from "@/hooks/useRamenData"
-import {useFormContext} from "react-hook-form"
+import {useFormContext, useWatch} from "react-hook-form"
 
 
 const ExerciseControl = () => {
 
-  const {register, watch} = useFormContext<ExerciseInput>()
-
-  const values = watch()
+  const {register} = useFormContext<ExerciseInput>()
+  const minutes = useWatch({name: "minutes"})
 
   return (
     <div className="leaflet-top leaflet-right mb-4">
@@ -16,7 +15,7 @@ const ExerciseControl = () => {
             <b>運動どのくらいがんばる？</b>
           </div>
           <div>
-            {values.minutes} 分 
+            {minutes} 分 
           </div>
           <div className="flex items-center">
             <input type="range" min="5" max="60" step="5" {...register("minutes")}  />

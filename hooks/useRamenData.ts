@@ -29,32 +29,7 @@ export type ExerciseInput = {
 
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()
-    const [filteredCultuals, setFilteredCultuals] = useState<CultualData[]>()
     const [cultuals, setCultuals] = useState<CultualData[]>()
-    const [safeCircle, setSafeCircle] = useState<FeatureCollection>()
-    const [radius, setRadius] = useState<{minutes: number, zero: number}>({minutes: 3.0, zero: 3.0})
-    const [latLng, setLatLng] = useState<LatLng>()
-
-    useEffect(() => {
-      if (latLng === undefined) return
-      const circleFeature = circle([latLng.lng, latLng.lat], radius.minutes, {properties: {level: 1}})
-      const circleZeroFeature = circle([latLng.lng, latLng.lat], radius.zero, {properties: {level: 2}, steps: 120})
-      const id = `${latLng.lat}_${latLng.lng}_${radius.minutes}`
-      circleFeature.id = id
-
-      const featureCollection: FeatureCollection = {
-        features: [
-          circleFeature,
-          circleZeroFeature
-        ],
-        type: 'FeatureCollection',
-      }
-      setSafeCircle(featureCollection)
-
-      if (cultuals === undefined) return
-      const filtered = cultuals.filter(c => isWithinRange(latLng, c.latLng, radius.minutes))
-      setFilteredCultuals(filtered)
-    }, [radius, latLng, cultuals])
 
     useEffect(() => {
       fetch(`/data/ramen.csv`)
@@ -104,12 +79,34 @@ const useRamenData = () => {
         })
     }, [])
 
-    const setExerciseInput = (input: ExerciseInput) => {
-      setRadius({minutes: getRadius(input), zero: getZeroCalRadius(input)} )
+    const getSafeCircle = (latLng: LatLng | undefined, input: ExerciseInput) => {
+      const emptyFeature: FeatureCollection = {
+        features: [],
+        type: 'FeatureCollection',
+      }
+      if (latLng === undefined) return emptyFeature
+      const minutes = getRadius(input)
+      const zero = getZeroCalRadius(input)
+      const circleFeature = circle([latLng.lng, latLng.lat], minutes, {properties: {level: 1}})
+      const circleZeroFeature = circle([latLng.lng, latLng.lat], zero, {properties: {level: 2}, steps: 120})
+      const id = `${latLng.lat}_${latLng.lng}_${minutes}`
+      circleFeature.id = id
+
+      const featureCollection: FeatureCollection = {
+        features: [
+          circleFeature,
+          circleZeroFeature
+        ],
+        type: 'FeatureCollection',
+      }
+      return featureCollection
     }
 
-    const showCircle = (point: LatLng) => {
-      setLatLng(point)
+    const getCultures = (latLng: LatLng | undefined, input: ExerciseInput) => {
+      if (latLng === undefined) return []
+      if (cultuals === undefined) return []
+      const minutes = getRadius(input)
+      return cultuals.filter(c => isWithinRange(latLng, c.latLng, minutes))
     }
 
     const getZeroCalRadius = (exercise: ExerciseInput) => {
@@ -145,7 +142,7 @@ const useRamenData = () => {
       return dist <= range
     }
 
-  return { ramenData: ramens, cultualData: filteredCultuals, showCircle, safeCircle, setExerciseInput }
+  return { ramenData: ramens, getCultures, getSafeCircle }
 }
 
 export default useRamenData
