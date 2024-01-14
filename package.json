@@ -9,10 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emotion/cache": "^11.11.0",
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@mui/material": "^5.15.4",
     "@turf/circle": "^6.5.0",
     "@turf/rhumb-distance": "^6.5.0",
     "deck.gl": "^8.9.33",

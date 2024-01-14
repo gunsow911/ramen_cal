@@ -5,7 +5,8 @@ import React, {useMemo, useState} from 'react'
 import { MapContainer, TileLayer} from 'react-leaflet'
 import {iconRamen, iconCultual} from './Icons'
 import ExerciseControl from './ExerciseControl'
-import {FormProvider, useForm, useWatch} from 'react-hook-form'
+import {FormProvider, useForm} from 'react-hook-form'
+import HomeControl from './HomeControl'
 
 const Map = () => {
   const {ramenData, getCultures, getSafeCircle} = useRamenData()
@@ -30,11 +31,13 @@ const Map = () => {
 
   form.watch()
 
-
-
   const safeCircle = useMemo(() => {
     return getSafeCircle(latLng, form.getValues())
   }, [getSafeCircle, latLng, form])
+
+  const cultures = useMemo(() => {
+    return getCultures(latLng, form.getValues())
+  }, [getCultures, latLng, form])
 
   const onClick = (e: LeafletMouseEvent) => {
     setLatLng(e.latlng)
@@ -94,7 +97,7 @@ const Map = () => {
             )
           }
         )}
-        {getCultures(latLng, form.getValues()).map((cultual, index) => {
+        {cultures.map((cultual, index) => {
           return(
             <React.Fragment key={index}>
               <Marker position={cultual.latLng} icon={cultualIcon}>

@@ -1,4 +1,5 @@
 import {ExerciseInput} from "@/hooks/useRamenData"
+import Link from "next/link"
 import {useFormContext, useWatch} from "react-hook-form"
 
 
@@ -8,7 +9,7 @@ const ExerciseControl = () => {
   const minutes = useWatch({name: "minutes"})
 
   return (
-    <div className="leaflet-top leaflet-right mb-4">
+    <div className="leaflet-top leaflet-right mb-4 w-64">
       <div className="leaflet-control leaflet-bar p-2 bg-white text-gray-900" >
         <div className="pb-2">
           <div>
@@ -51,6 +52,9 @@ const ExerciseControl = () => {
             <label htmlFor="exercise-is-half" className="ms-1">片道</label>
           </div>
         </div>
+      </div>
+      <div className="leaflet-control leaflet-bar bg-white text-gray-900">
+        <Link className="leaflet-mainpage-link" href="/" passHref>ページに戻る</Link>
       </div>
     </div>
   )
