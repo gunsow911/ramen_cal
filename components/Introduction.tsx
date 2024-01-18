@@ -20,9 +20,7 @@ export default function Introduction() {
       </div>
 
       <div className="text-lg mb-2 font-semibold">
-        私たちは、ラーメンを食べることで、<span className='text-2xl'>大きな満足感</span>を得ることができます。
-      </div>
-      <div className="text-lg mb-2 font-semibold">
+        私たちは、ラーメンを食べることで、<span className='text-2xl'>大きな満足感</span>を得ることができます。<br />
         しかし、その満足感と引き換えに…
       </div>
       <div className="text-lg mb-2 font-semibold">
@@ -32,7 +30,7 @@ export default function Introduction() {
         そして、なんとなく感じてしまう<span className='text-3xl text-red-600'>罪悪感</span>…
       </div>
       <div className="text-lg font-semibold">
-        あぁ、ラーメンはなんて罪な料理なんでしょうか…
+        あぁ、ラーメンはなんて罪な料理なんでしょう…
       </div>
     </Description>
   </>

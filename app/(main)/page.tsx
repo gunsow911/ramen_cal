@@ -11,7 +11,7 @@ export default function MainPage() {
     <main>
       <div className="container mx-auto px-5 py-5">
         <div>
-          <Image className="m-auto" src="/title.png" alt="ラーメン食べても罪滅ぼしウォーキング" width={512} height={512} objectFit="contain"></Image>
+          <Image className="m-auto" src="/title.png" alt="ラーメン食べても罪滅ぼしウォーキング" width={512} height={512} layout="fixed" ></Image>
         </div>
         <div className='py-4'>
           <ButtonLink href='/map'>マップを見る</ButtonLink>
