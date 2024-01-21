@@ -6,9 +6,10 @@ import { MapContainer, TileLayer} from 'react-leaflet'
 import {iconRamen, iconCultual, iconTourism} from './Icons'
 import ExerciseControl from './ExerciseControl'
 import {FormProvider, useForm} from 'react-hook-form'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 
 const Map = () => {
-  const {ramenData, getCultures, getTourisms, getSafeCircle} = useRamenData()
+  const {ramenData, getLocations, getSafeCircle} = useRamenData()
   const [latLng, setLatLng] = useState<LatLng>()
   const ramenIcon = useMemo(() => {
     const icon: Icon = iconRamen
@@ -38,13 +39,9 @@ const Map = () => {
     return getSafeCircle(latLng, form.getValues())
   }, [getSafeCircle, latLng, form])
 
-  const cultures = useMemo(() => {
-    return getCultures(latLng, form.getValues())
-  }, [getCultures, latLng, form])
-
-  const tourisms = useMemo(() => {
-    return getTourisms(latLng, form.getValues())
-  }, [getTourisms, latLng, form])
+  const locations = useMemo(() => {
+    return getLocations(latLng, form.getValues())
+  }, [getLocations, latLng, form])
 
   const onClick = (e: LeafletMouseEvent) => {
     setLatLng(e.latlng)
@@ -104,41 +101,29 @@ const Map = () => {
             )
           }
         )}
-        {cultures.map((cultual, index) => {
-          return(
-            <React.Fragment key={index}>
-              <Marker position={cultual.latLng} icon={cultualIcon}>
-                <Popup>
-                 <div className='pt-2'>
-                   <div className='font-semibold'>{cultual.name}</div>
-                   <div className='text-xs'>{cultual.address}</div>
-                   <div className='pt-1'>
-                     <div>{cultual.caltualType}</div>
-                     <div>{cultual.kind}</div>
+        <MarkerClusterGroup
+          showCoverageOnHover={false}
+          maxClusterRadius={4}
+        >
+          {locations.map((location, index) => {
+            const icon = location.type === "cultual" ? cultualIcon : tourismIcon
+            return(
+              <React.Fragment key={index}>
+                <Marker position={location.latLng} icon={icon}>
+                  <Popup>
+                   <div className='pt-2'>
+                     <div className='font-semibold'>{location.name}</div>
+                     <div className='text-xs'>{location.address}</div>
+                     <div className='pt-1'>{location.description}</div>
                    </div>
-                 </div>
-                </Popup>
-              </Marker>
-            </React.Fragment>
-            )
-          }
-        )}
-        {tourisms.map((tourism, index) => {
-          return(
-            <React.Fragment key={index}>
-              <Marker position={tourism.latLng} icon={tourismIcon}>
-                <Popup>
-                 <div className='pt-2'>
-                   <div className='font-semibold'>{tourism.name}</div>
-                   <div className='text-xs'>{tourism.address}</div>
-                   <div className='pt-1'>{tourism.description}</div>
-                 </div>
-                </Popup>
-              </Marker>
-            </React.Fragment>
-            )
-          }
-        )}
+                  </Popup>
+                </Marker>
+              </React.Fragment>
+              )
+            }
+          )}
+        </MarkerClusterGroup>
+
         <ExerciseControl />
       </MapContainer>
     </FormProvider>

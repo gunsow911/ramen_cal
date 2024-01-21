@@ -12,20 +12,15 @@ type RamenData = {
   tel?: string,
 }
 
-type CultualData = {
-  latLng: LatLng,
-  name: string,
-  address: string,
-  caltualType: string,
-  kind: string,
-}
 
-type TourismData = {
+type LocationData = {
   latLng: LatLng,
   name: string,
   address: string,
   description: string,
+  type: "cultual" | "tourism"
 }
+
 
 
 export type ExerciseInput = {
@@ -37,8 +32,7 @@ export type ExerciseInput = {
 
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()
-    const [cultuals, setCultuals] = useState<CultualData[]>()
-    const [tourisms, setTourisms] = useState<TourismData[]>()
+    const [locations, setLocations] = useState<LocationData[]>()
 
     useEffect(() => {
       fetch(`/data/ramen.csv`)
@@ -63,37 +57,36 @@ const useRamenData = () => {
           setRamens(rows) 
         })
 
-      fetch(`/data/culture.csv`)
+      const cultures = fetch(`/data/culture.csv`)
         .then(res => res.text())
         .then(text => {
           const results = parse(text ,{
             skipEmptyLines: true,
           })
-          const rows = results.data.map<CultualData>((d) => {
+          const rows = results.data.map<LocationData>((d) => {
             const row = d as any[]
             const latLng = new LatLng(row[6], row[7])
             const name = row[2]
             const address = row[0] + row[1] + row[5]
-            const caltualType = row[3]
-            const kind = row[4]
+            const description = row[3] + row[4]
             return {
               name,
               latLng,
               address,
-              caltualType,
-              kind,
+              description,
+              type: "cultual",
             }
           })
-          setCultuals(rows) 
+          return rows
         })
 
-      fetch(`/data/tourism.csv`)
+      const tourisms = fetch(`/data/tourism.csv`)
         .then(res => res.text())
         .then(text => {
           const results = parse(text ,{
             skipEmptyLines: true,
           })
-          const rows = results.data.map<TourismData>((d) => {
+          const rows = results.data.map<LocationData>((d) => {
             const row = d as any[]
             const latLng = new LatLng(row[2], row[3])
             const name = row[0]
@@ -104,9 +97,15 @@ const useRamenData = () => {
               latLng,
               address,
               description,
+              type: "tourism"
             }
           })
-          setTourisms(rows) 
+          return rows
+        })
+
+        Promise.all([cultures, tourisms]).then((value) => {
+          const locations = value.flat(2)
+          setLocations(locations)
         })
 
     }, [])
@@ -135,18 +134,11 @@ const useRamenData = () => {
       return featureCollection
     }
 
-    const getCultures = (latLng: LatLng | undefined, input: ExerciseInput) => {
+    const getLocations = (latLng: LatLng | undefined, input: ExerciseInput) => {
       if (latLng === undefined) return []
-      if (cultuals === undefined) return []
+      if (locations === undefined) return []
       const minutes = getRadius(input)
-      return cultuals.filter(c => isWithinRange(latLng, c.latLng, minutes))
-    }
-
-    const getTourisms = (latLng: LatLng | undefined, input: ExerciseInput) => {
-      if (latLng === undefined) return []
-      if (tourisms === undefined) return []
-      const minutes = getRadius(input)
-      return tourisms.filter(c => isWithinRange(latLng, c.latLng, minutes))
+      return locations.filter(c => isWithinRange(latLng, c.latLng, minutes))
     }
 
     const getZeroCalRadius = (exercise: ExerciseInput) => {
@@ -182,7 +174,7 @@ const useRamenData = () => {
       return dist <= range
     }
 
-  return { ramenData: ramens, getCultures, getTourisms, getSafeCircle }
+  return { ramenData: ramens, getLocations, getSafeCircle }
 }
 
 export default useRamenData

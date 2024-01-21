@@ -11,6 +11,10 @@ const OpenDataReference = () => {
       name: "【山口県】文化財一覧",
       url: "https://yamaguchi-opendata.jp/ckan/dataset/cultural_property",
     },
+    {
+      name: "【山口県】観光施設一覧",
+      url: "https://yamaguchi-opendata.jp/ckan/dataset/tourism",
+    },
   ]
 
   return <>
