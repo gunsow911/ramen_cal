@@ -9,7 +9,7 @@ const Title = (props: Props) => {
   return (
     <>
       <div className="flex">
-        <Image className="mr-2" src="/icons/ramen.png" alt="loading" width={28} height={28} layout="fixed" />
+        <Image className="mr-2" src="/icons/ramen.png" style={{maxHeight: 32}} alt="loading" width={32} height={32} layout="fixed" />
         <div className="font-semibold text-3xl my-auto">
           {props.children}
         </div>
