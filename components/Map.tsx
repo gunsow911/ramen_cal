@@ -3,13 +3,12 @@ import { Marker, Popup, GeoJSON } from 'react-leaflet'
 import { Icon, LatLng, LeafletMouseEvent } from 'leaflet'
 import React, {useMemo, useState} from 'react'
 import { MapContainer, TileLayer} from 'react-leaflet'
-import {iconRamen, iconCultual} from './Icons'
+import {iconRamen, iconCultual, iconTourism} from './Icons'
 import ExerciseControl from './ExerciseControl'
 import {FormProvider, useForm} from 'react-hook-form'
-import HomeControl from './HomeControl'
 
 const Map = () => {
-  const {ramenData, getCultures, getSafeCircle} = useRamenData()
+  const {ramenData, getCultures, getTourisms, getSafeCircle} = useRamenData()
   const [latLng, setLatLng] = useState<LatLng>()
   const ramenIcon = useMemo(() => {
     const icon: Icon = iconRamen
@@ -17,6 +16,10 @@ const Map = () => {
   }, [])
   const cultualIcon = useMemo(() => {
     const icon: Icon = iconCultual
+    return icon
+  }, [])
+  const tourismIcon = useMemo(() => {
+    const icon: Icon = iconTourism
     return icon
   }, [])
 
@@ -38,6 +41,10 @@ const Map = () => {
   const cultures = useMemo(() => {
     return getCultures(latLng, form.getValues())
   }, [getCultures, latLng, form])
+
+  const tourisms = useMemo(() => {
+    return getTourisms(latLng, form.getValues())
+  }, [getTourisms, latLng, form])
 
   const onClick = (e: LeafletMouseEvent) => {
     setLatLng(e.latlng)
@@ -85,10 +92,10 @@ const Map = () => {
               <Marker position={ramen.latLng} icon={ramenIcon} eventHandlers={{click: onClick}}>
                 <Popup>
                  <div className='pt-2'>
-                   <h2>{ramen.name}</h2>
-                   <div>{ramen.address}</div>
-                   <div>
-                   {ramen.tel && "電話番号: " + ramen.tel}
+                   <div className='font-semibold'>{ramen.name}</div>
+                   <div className='text-xs'>{ramen.address}</div>
+                   <div className='text-xs'>
+                     {ramen.tel && "電話番号: " + ramen.tel}
                    </div>
                  </div>
                 </Popup>
@@ -103,10 +110,28 @@ const Map = () => {
               <Marker position={cultual.latLng} icon={cultualIcon}>
                 <Popup>
                  <div className='pt-2'>
-                   <h2>{cultual.name}</h2>
-                   <div>{cultual.address}</div>
-                   <div>{cultual.caltualType}</div>
-                   <div>{cultual.kind}</div>
+                   <div className='font-semibold'>{cultual.name}</div>
+                   <div className='text-xs'>{cultual.address}</div>
+                   <div className='pt-1'>
+                     <div>{cultual.caltualType}</div>
+                     <div>{cultual.kind}</div>
+                   </div>
+                 </div>
+                </Popup>
+              </Marker>
+            </React.Fragment>
+            )
+          }
+        )}
+        {tourisms.map((tourism, index) => {
+          return(
+            <React.Fragment key={index}>
+              <Marker position={tourism.latLng} icon={tourismIcon}>
+                <Popup>
+                 <div className='pt-2'>
+                   <div className='font-semibold'>{tourism.name}</div>
+                   <div className='text-xs'>{tourism.address}</div>
+                   <div className='pt-1'>{tourism.description}</div>
                  </div>
                 </Popup>
               </Marker>

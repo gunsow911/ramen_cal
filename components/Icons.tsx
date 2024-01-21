@@ -10,3 +10,7 @@ export const iconCultual = new L.Icon({
   iconSize: new L.Point(32, 32),
 })
 
+export const iconTourism = new L.Icon({
+  iconUrl: 'icons/tourism.png',
+  iconSize: new L.Point(32, 32),
+})

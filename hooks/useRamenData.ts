@@ -20,6 +20,14 @@ type CultualData = {
   kind: string,
 }
 
+type TourismData = {
+  latLng: LatLng,
+  name: string,
+  address: string,
+  description: string,
+}
+
+
 export type ExerciseInput = {
   minutes: number,
   method: "walking"| "jogging" | "running" | "cycling"
@@ -30,6 +38,7 @@ export type ExerciseInput = {
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()
     const [cultuals, setCultuals] = useState<CultualData[]>()
+    const [tourisms, setTourisms] = useState<TourismData[]>()
 
     useEffect(() => {
       fetch(`/data/ramen.csv`)
@@ -77,7 +86,31 @@ const useRamenData = () => {
           })
           setCultuals(rows) 
         })
+
+      fetch(`/data/tourism.csv`)
+        .then(res => res.text())
+        .then(text => {
+          const results = parse(text ,{
+            skipEmptyLines: true,
+          })
+          const rows = results.data.map<TourismData>((d) => {
+            const row = d as any[]
+            const latLng = new LatLng(row[2], row[3])
+            const name = row[0]
+            const address = row[1]
+            const description = row[4]
+            return {
+              name,
+              latLng,
+              address,
+              description,
+            }
+          })
+          setTourisms(rows) 
+        })
+
     }, [])
+
 
     const getSafeCircle = (latLng: LatLng | undefined, input: ExerciseInput) => {
       const emptyFeature: FeatureCollection = {
@@ -107,6 +140,13 @@ const useRamenData = () => {
       if (cultuals === undefined) return []
       const minutes = getRadius(input)
       return cultuals.filter(c => isWithinRange(latLng, c.latLng, minutes))
+    }
+
+    const getTourisms = (latLng: LatLng | undefined, input: ExerciseInput) => {
+      if (latLng === undefined) return []
+      if (tourisms === undefined) return []
+      const minutes = getRadius(input)
+      return tourisms.filter(c => isWithinRange(latLng, c.latLng, minutes))
     }
 
     const getZeroCalRadius = (exercise: ExerciseInput) => {
@@ -142,7 +182,7 @@ const useRamenData = () => {
       return dist <= range
     }
 
-  return { ramenData: ramens, getCultures, getSafeCircle }
+  return { ramenData: ramens, getCultures, getTourisms, getSafeCircle }
 }
 
 export default useRamenData
