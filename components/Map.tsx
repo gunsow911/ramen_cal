@@ -3,7 +3,7 @@ import { Marker, Popup, GeoJSON } from 'react-leaflet'
 import { Icon, LatLng, LeafletMouseEvent } from 'leaflet'
 import React, {useMemo, useState} from 'react'
 import { MapContainer, TileLayer} from 'react-leaflet'
-import {iconRamen, iconCultual, iconTourism} from './Icons'
+import {iconRamen, iconCultual, iconTourism, iconSpa} from './Icons'
 import ExerciseControl from './ExerciseControl'
 import {FormProvider, useForm} from 'react-hook-form'
 import MarkerClusterGroup from 'react-leaflet-cluster'
@@ -21,6 +21,10 @@ const Map = () => {
   }, [])
   const tourismIcon = useMemo(() => {
     const icon: Icon = iconTourism
+    return icon
+  }, [])
+  const spaIcon = useMemo(() => {
+    const icon: Icon = iconSpa
     return icon
   }, [])
 
@@ -106,7 +110,10 @@ const Map = () => {
           maxClusterRadius={4}
         >
           {locations.map((location, index) => {
-            const icon = location.type === "cultual" ? cultualIcon : tourismIcon
+            let icon = undefined
+            if (location.type === "cultual") icon = cultualIcon 
+            if (location.type === "tourism") icon = tourismIcon 
+            if (location.type === "spa") icon = spaIcon
             return(
               <React.Fragment key={index}>
                 <Marker position={location.latLng} icon={icon}>

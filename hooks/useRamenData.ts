@@ -18,7 +18,7 @@ type LocationData = {
   name: string,
   address: string,
   description: string,
-  type: "cultual" | "tourism"
+  type: "cultual" | "tourism" | "spa"
 }
 
 
@@ -103,7 +103,30 @@ const useRamenData = () => {
           return rows
         })
 
-        Promise.all([cultures, tourisms]).then((value) => {
+      const spas = fetch(`/data/spa.csv`)
+        .then(res => res.text())
+        .then(text => {
+          const results = parse(text ,{
+            skipEmptyLines: true,
+          })
+          const rows = results.data.map<LocationData>((d) => {
+            const row = d as any[]
+            const latLng = new LatLng(row[2], row[3])
+            const name = row[0]
+            const address = row[1]
+            const description = ""
+            return {
+              name,
+              latLng,
+              address,
+              description,
+              type: "spa"
+            }
+          })
+          return rows
+        })
+
+        Promise.all([cultures, tourisms, spas]).then((value) => {
           const locations = value.flat(2)
           setLocations(locations)
         })
