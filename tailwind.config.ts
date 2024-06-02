@@ -1,4 +1,6 @@
+import { getIconCollections, iconsPlugin  } from '@egoist/tailwindcss-icons'
 import type { Config } from 'tailwindcss'
+
 
 const config: Config = {
   content: [
@@ -6,6 +8,10 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  plugins: [],
+  plugins: [
+    iconsPlugin({
+      collections: getIconCollections(["simple-icons"])
+    })
+  ],
 }
 export default config

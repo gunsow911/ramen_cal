@@ -5,6 +5,7 @@ import Introduction from '@/components/Introduction';
 import Solution from '@/components/Solution';
 import ButtonLink from '@/components/ButtonLink';
 import OpenDataReference from '@/components/OpenDataReference';
+import Credit from '@/components/Credit';
 
 export default function MainPage() {
   return (
@@ -24,6 +25,9 @@ export default function MainPage() {
         </div>
         <div className='py-4'>
           <OpenDataReference />
+        </div>
+        <div className='py-4'>
+          <Credit />
         </div>
       </div>
     </main>
