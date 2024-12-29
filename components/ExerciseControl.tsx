@@ -1,15 +1,23 @@
 import {ExerciseInput} from "@/hooks/useRamenData"
 import Link from "next/link"
+import {useEffect, useRef} from "react"
 import {useFormContext, useWatch} from "react-hook-form"
-
+import L from "leaflet";
 
 const ExerciseControl = () => {
-
+  const ref = useRef(null);
   const {register} = useFormContext<ExerciseInput>()
   const minutes = useWatch({name: "minutes"})
 
+  useEffect(() => {
+    if (ref.current) {
+      const disableClickPropagation = L.DomEvent.disableClickPropagation;
+      disableClickPropagation(ref.current);
+    }
+  }, []);
+
   return (
-    <div className="leaflet-top leaflet-right mb-4 w-64">
+    <div ref={ref} className="leaflet-top leaflet-right mb-4 w-64">
       <div className="leaflet-control leaflet-bar p-2 bg-white text-gray-900" >
         <div className="pb-2">
           <div>
