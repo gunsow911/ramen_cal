@@ -21,14 +21,15 @@ type LocationData = {
   type: "cultual" | "tourism" | "spa"
 }
 
-
+export type SearchInput = {
+  query: string
+}
 
 export type ExerciseInput = {
   minutes: number,
   method: "walking"| "jogging" | "running" | "cycling"
   isHalf: boolean
 }
-
 
 const useRamenData = () => {
     const [ramens, setRamens] = useState<RamenData[]>()

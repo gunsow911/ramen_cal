@@ -7,6 +7,8 @@ import {iconRamen, iconCultual, iconTourism, iconSpa} from './Icons'
 import ExerciseControl from './ExerciseControl'
 import {FormProvider, useForm} from 'react-hook-form'
 import MarkerClusterGroup from 'react-leaflet-cluster'
+import SearchControl from './SearchControl'
+import HomeControl from './HomeControl'
 
 const Map = () => {
   const {ramenData, getLocations, getSafeCircle} = useRamenData()
@@ -131,7 +133,21 @@ const Map = () => {
           )}
         </MarkerClusterGroup>
 
-        <ExerciseControl />
+        <div className="flex mt-2">
+          <div className="no-flex ml-16">
+          </div>
+          <div className="grow w-full mr-3">
+            <SearchControl />
+          </div>
+          <div className="no-flex mr-3 justify-end">
+            <div>
+              <ExerciseControl />
+            </div>
+            <div>
+              <HomeControl />
+            </div>
+          </div>
+        </div>
       </MapContainer>
     </FormProvider>
   )
