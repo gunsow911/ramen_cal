@@ -1,7 +1,7 @@
-import useRamenData, {ExerciseInput} from '@/hooks/useRamenData'
+import useRamenData, {ExerciseInput, LocationData, RamenData} from '@/hooks/useRamenData'
 import { Marker, Popup, GeoJSON } from 'react-leaflet'
-import { Icon, LatLng, LeafletMouseEvent } from 'leaflet'
-import React, {useMemo, useState} from 'react'
+import { Icon, LatLng, LeafletMouseEvent, Marker as LeafletMarker } from 'leaflet'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
 import { MapContainer, TileLayer} from 'react-leaflet'
 import {iconRamen, iconCultual, iconTourism, iconSpa} from './Icons'
 import ExerciseControl from './ExerciseControl'
@@ -9,8 +9,17 @@ import {FormProvider, useForm} from 'react-hook-form'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import SearchControl from './SearchControl'
 import HomeControl from './HomeControl'
+import PanPlugin from './PanPlugin'
 
-const Map = () => {
+type Props = {
+  onSearchToggle?: () => void
+  onLoadRamenData?: (ramenData?: RamenData[]) => void
+  toRamen?: RamenData
+}
+
+const Map = (props: Props) => {
+  const markerRefs = useRef<{[key: string]: LeafletMarker<any> | null}>({})
+  const selectedRef = useRef<LeafletMarker<any> | null>(null)
   const {ramenData, getLocations, getSafeCircle} = useRamenData()
   const [latLng, setLatLng] = useState<LatLng>()
   const ramenIcon = useMemo(() => {
@@ -29,6 +38,19 @@ const Map = () => {
     const icon: Icon = iconSpa
     return icon
   }, [])
+
+  useEffect(() => {
+    if (props.toRamen) {
+      setLatLng(props.toRamen.latLng)
+      selectedRef.current = markerRefs.current[props.toRamen.name]
+    }
+  }, [props.toRamen])
+
+  useEffect(() => {
+    props.onLoadRamenData && props.onLoadRamenData(ramenData)
+    markerRefs.current = {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ramenData])
 
   const form = useForm<ExerciseInput>({
     reValidateMode: "onSubmit",
@@ -49,8 +71,21 @@ const Map = () => {
     return getLocations(latLng, form.getValues())
   }, [getLocations, latLng, form])
 
-  const onClick = (e: LeafletMouseEvent) => {
+  const onClick = (e: LeafletMouseEvent, ramen: RamenData) => {
     setLatLng(e.latlng)
+    selectedRef.current = markerRefs.current[ramen.name]
+  }
+
+  const onClickLocation = (_e: LeafletMouseEvent, location: LocationData) => {
+    selectedRef.current = markerRefs.current[location.name]
+  }
+
+  const onPanStart = () => {
+    selectedRef.current?.closePopup();
+  }
+
+  const onPanEnd = () => {
+    selectedRef.current?.openPopup();
   }
 
   return (
@@ -92,7 +127,12 @@ const Map = () => {
         {ramenData && ramenData.map((ramen, index) => {
           return(
             <React.Fragment key={index}>
-              <Marker position={ramen.latLng} icon={ramenIcon} eventHandlers={{click: onClick}}>
+              <Marker 
+                 position={ramen.latLng}
+                 icon={ramenIcon}
+                 eventHandlers={{click: (e) => onClick(e, ramen)}}
+                 ref={(el) => {markerRefs.current[ramen.name] = el}}
+              >
                 <Popup>
                  <div className='pt-2'>
                    <div className='font-semibold'>{ramen.name}</div>
@@ -118,7 +158,12 @@ const Map = () => {
             if (location.type === "spa") icon = spaIcon
             return(
               <React.Fragment key={index}>
-                <Marker position={location.latLng} icon={icon}>
+                <Marker 
+                   position={location.latLng} 
+                   icon={icon}
+                   eventHandlers={{click: (e) => onClickLocation(e, location)}}
+                   ref={(el) => {markerRefs.current[location.name] = el}}
+                >
                   <Popup>
                    <div className='pt-2'>
                      <div className='font-semibold'>{location.name}</div>
@@ -134,10 +179,10 @@ const Map = () => {
         </MarkerClusterGroup>
 
         <div className="flex mt-2">
-          <div className="no-flex ml-16">
+          <div className="mt-[70px] ml-[10px]">
+            <SearchControl onClick={props.onSearchToggle} />
           </div>
           <div className="grow w-full mr-3">
-            <SearchControl />
           </div>
           <div className="no-flex mr-3 justify-end">
             <div>
@@ -148,6 +193,7 @@ const Map = () => {
             </div>
           </div>
         </div>
+        <PanPlugin onPanStart={onPanStart} onPanEnd={onPanEnd} toRamen={props.toRamen} />
       </MapContainer>
     </FormProvider>
   )

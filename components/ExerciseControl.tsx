@@ -24,7 +24,7 @@ const ExerciseControl = () => {
         <div>
           {minutes} 分 
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer">
           <input type="range" min="5" max="60" step="5" {...register("minutes")}  />
         </div>
       </div>

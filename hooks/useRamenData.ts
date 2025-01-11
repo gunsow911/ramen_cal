@@ -5,15 +5,20 @@ import circle from "@turf/circle"
 import {FeatureCollection} from 'geojson'
 import rhumbDistance from '@turf/rhumb-distance'
 
-type RamenData = {
+export type RamenDataHookProps = {
+  ramenData?: RamenData[],
+  getLocations: (latLng: LatLng | undefined, input: ExerciseInput) => LocationData[],
+  getSafeCircle: (latLng: LatLng | undefined, input: ExerciseInput) => FeatureCollection
+}
+
+export type RamenData = {
   latLng: LatLng,
   name: string,
   address: string,
   tel?: string,
 }
 
-
-type LocationData = {
+export type LocationData = {
   latLng: LatLng,
   name: string,
   address: string,
@@ -31,7 +36,7 @@ export type ExerciseInput = {
   isHalf: boolean
 }
 
-const useRamenData = () => {
+const useRamenData = (): RamenDataHookProps => {
     const [ramens, setRamens] = useState<RamenData[]>()
     const [locations, setLocations] = useState<LocationData[]>()
 
