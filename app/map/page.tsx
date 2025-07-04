@@ -38,7 +38,7 @@ export default function MapPage() {
         <Sidebar open={open} onClose={() => setOpen(false)}>
           <Search value={value} onValueChange={(v) => setValue(v)} ramenData={ramenData} onSearch={onSearch} />
         </Sidebar>
-        <div className='h-hull'>
+        <div className='h-full'>
           <Map onSearchToggle={() => setOpen(true)} onLoadRamenData={setRamenData} toRamen={ramen} />
         </div>
       </div>
